@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retroalimentación a mis Team Members — Tec de Monterrey</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #003087;
+    --azul-claro: #0050b3;
+    --gris-fondo: #f4f6f9;
+    --gris-borde: #dde2ea;
+    --texto: #1a1f2e;
+    --texto-suave: #5a6275;
+    --blanco: #ffffff;
+    --acento: #0078d4;
+    --exito: #00875a;
+    --estrella-vacia: #d1d9e0;
+    --estrella-llena: #f5a623;
+    --error: #de3618;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--gris-fondo); color: var(--texto); min-height: 100vh; }
+
+  .header { background: var(--azul); color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,48,135,0.3); }
+  .header-inner { max-width: 760px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+  .tec-badge { background: white; color: var(--azul); font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; white-space: nowrap; }
+  .header-text { flex: 1; }
+  .header-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; line-height: 1.2; }
+  .header-subtitle { font-size: 12px; opacity: 0.75; margin-top: 2px; letter-spacing: 0.03em; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 32px 24px 80px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .card { background: var(--blanco); border-radius: 12px; border: 1px solid var(--gris-borde); padding: 32px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+  .intro-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--acento); margin-bottom: 12px; }
+  .intro-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; line-height: 1.25; color: var(--azul); margin-bottom: 20px; }
+  .intro-body { font-size: 15px; line-height: 1.7; color: var(--texto-suave); }
+  .intro-body p { margin-bottom: 12px; }
+  .intro-body strong { color: var(--texto); font-weight: 500; }
+  .intro-highlight { background: #eef4ff; border-left: 3px solid var(--acento); border-radius: 0 6px 6px 0; padding: 14px 16px; margin: 20px 0; font-size: 14px; color: var(--texto); line-height: 1.6; }
+
+  .select-label { font-size: 13px; font-weight: 500; color: var(--texto); margin-bottom: 8px; display: block; }
+  select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--gris-borde); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--texto); background: white; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235a6275' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; transition: border-color 0.2s; }
+  select:focus { outline: none; border-color: var(--acento); }
+
+  .progress-wrap { margin-bottom: 24px; }
+  .progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .progress-label { font-size: 12px; color: var(--texto-suave); font-weight: 500; }
+  .progress-bar { height: 4px; background: var(--gris-borde); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--acento); border-radius: 99px; transition: width 0.4s ease; }
+
+  .evaluado-nombre { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 600; color: var(--azul); margin-bottom: 4px; }
+  .evaluado-equipo { font-size: 12px; color: var(--texto-suave); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 28px; }
+  .equipo-tag { display: inline-block; background: #eef4ff; color: var(--acento); padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 500; margin-right: 4px; }
+
+  .field-label { font-size: 13px; font-weight: 500; color: var(--texto); margin-bottom: 10px; display: block; }
+  .field-sublabel { font-size: 12px; color: var(--texto-suave); margin-bottom: 10px; display: block; line-height: 1.5; }
+  .stars-wrap { display: flex; gap: 8px; margin-bottom: 8px; }
+  .star { font-size: 36px; cursor: pointer; color: var(--estrella-vacia); transition: color 0.15s, transform 0.1s; line-height: 1; user-select: none; }
+  .star:hover, .star.filled { color: var(--estrella-llena); }
+  .star:hover { transform: scale(1.15); }
+  .stars-desc { font-size: 12px; color: var(--texto-suave); height: 18px; }
+
+  .field-group { margin-bottom: 24px; }
+  textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--gris-borde); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--texto); resize: vertical; min-height: 90px; line-height: 1.6; transition: border-color 0.2s; }
+  textarea:focus { outline: none; border-color: var(--acento); }
+  textarea::placeholder { color: #a0a8b5; }
+
+  .divider { height: 1px; background: var(--gris-borde); margin: 28px 0; }
+
+  .btn-row { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+  .btn { padding: 12px 24px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-primary { background: var(--azul); color: white; }
+  .btn-primary:hover { background: var(--azul-claro); }
+  .btn-secondary { background: transparent; color: var(--texto-suave); border: 1.5px solid var(--gris-borde); }
+  .btn-secondary:hover { border-color: var(--texto-suave); color: var(--texto); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .auto-intro { background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e8 100%); border-radius: 10px; padding: 20px; margin-bottom: 24px; border: 1px solid #c8d8f0; }
+  .auto-intro-title { font-family: 'Fraunces', serif; font-size: 16px; color: var(--azul); margin-bottom: 8px; }
+  .auto-intro-text { font-size: 13px; color: var(--texto-suave); line-height: 1.6; }
+
+  .final-icon { width: 64px; height: 64px; background: #e6f4ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 20px; }
+  .final-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; color: var(--azul); text-align: center; margin-bottom: 12px; }
+  .final-body { font-size: 14px; color: var(--texto-suave); text-align: center; line-height: 1.7; max-width: 480px; margin: 0 auto 24px; }
+  .codigo-box { background: var(--azul); color: white; border-radius: 10px; padding: 20px 24px; text-align: center; margin: 0 auto 16px; max-width: 320px; }
+  .codigo-label { font-size: 11px; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-bottom: 6px; }
+  .codigo-valor { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; letter-spacing: 0.05em; }
+  .resumen-title { font-size: 13px; font-weight: 500; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .resumen-item { background: var(--gris-fondo); border-radius: 8px; padding: 14px 16px; margin-bottom: 8px; border: 1px solid var(--gris-borde); }
+  .resumen-nombre { font-weight: 500; font-size: 14px; color: var(--texto); margin-bottom: 4px; }
+  .resumen-estrellas { color: var(--estrella-llena); font-size: 14px; }
+
+  .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-msg { color: var(--error); font-size: 13px; margin-top: 6px; display: none; }
+  .error-msg.visible { display: block; }
+
+  .demo-badge { display: inline-block; background: #fff3cd; color: #856404; border: 1px solid #ffc107; border-radius: 99px; font-size: 11px; font-weight: 600; padding: 2px 10px; margin-left: 8px; vertical-align: middle; letter-spacing: 0.05em; }
+
+  @media (max-width: 600px) {
+    .container { padding: 20px 16px 80px; }
+    .card { padding: 22px 18px; }
+    .intro-title { font-size: 22px; }
+    .evaluado-nombre { font-size: 20px; }
+    .star { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="tec-badge">Tec de Monterrey</div>
+    <div class="header-text">
+      <div class="header-title">Retroalimentación a mis Team Members</div>
+      <div class="header-subtitle">Procesos de Gestión del Talento &nbsp;·&nbsp; Mayo–Junio 2026 &nbsp;·&nbsp; Sofía Eugenia García Maza</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- PANTALLA 0: INTRO + SELECCIÓN -->
+  <div class="screen active" id="screen-intro">
+    <div class="card">
+      <div class="intro-label">Actividad de evaluación</div>
+      <div class="intro-title">Retroalimentación a mis Team Members</div>
+      <div class="intro-body">
+        <p>Durante el <strong>Periodo 3</strong> colaboraste en tres equipos: <span style="color:var(--acento);font-weight:500;">PAR · Letras griegas · Color</span>. Esta actividad vale <strong>15 puntos de tu examen final</strong>.</p>
+        <div class="intro-highlight">
+          <div style="font-size:13px;font-weight:600;color:var(--azul);margin-bottom:10px;">&#128203; Lo que vas a hacer</div>
+          <div style="display:grid;gap:7px;">
+            <div>&#9989; <strong>Evalúa a 5 compañeros</strong> seleccionados de tus equipos (no a todos)</div>
+            <div>&#11088; <strong>Califica</strong> su desempeño del 1 al 5</div>
+            <div>&#128172; <strong>Reconoce</strong> algo concreto que aprecias de su trabajo</div>
+            <div>&#128640; <strong>Recomienda</strong> algo que podría potenciar en el futuro</div>
+            <div>&#128269; <strong>Autoevalúate</strong> al final (reflexión breve)</div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--texto-suave);">Sé <em>honesto</em>, <em>específico</em> y <em>constructivo</em>. Tus respuestas son confidenciales.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="select-label" for="nombre-select">¿Cuál es tu nombre?</label>
+      <select id="nombre-select">
+        <option value="">— Selecciona tu nombre —</option>
+      </select>
+      <div class="error-msg" id="error-nombre">Por favor selecciona tu nombre para continuar.</div>
+      <div id="demo-aviso" style="display:none;margin-top:12px;padding:10px 14px;background:#fff8e6;border-radius:8px;font-size:13px;color:#856404;border:1px solid #ffc107;">
+        &#9888;&#65039; Estás en <strong>modo DEMO</strong>. Este recorrido es solo de ejemplo para que veas cómo funciona la actividad.
+      </div>
+      <div style="margin-top: 20px;">
+        <button class="btn btn-primary" onclick="iniciarEvaluacion()">Comenzar evaluación &#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA 1: EVALUACIÓN DE COMPAÑERO -->
+  <div class="screen" id="screen-eval">
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label" id="progress-label">Evaluando 1 de 5</span>
+        <span class="progress-label" id="progress-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="evaluado-nombre" id="eval-nombre"></div>
+      <div class="evaluado-equipo" id="eval-equipo"></div>
+
+      <div class="field-group">
+        <span class="field-label">Desempeño en equipo</span>
+        <span class="field-sublabel">¿Qué tan efectiva fue su participación y contribución al trabajo colectivo?</span>
+        <div class="stars-wrap" id="stars-wrap">
+          <span class="star" data-val="1" onclick="setStars(1)">&#9733;</span>
+          <span class="star" data-val="2" onclick="setStars(2)">&#9733;</span>
+          <span class="star" data-val="3" onclick="setStars(3)">&#9733;</span>
+          <span class="star" data-val="4" onclick="setStars(4)">&#9733;</span>
+          <span class="star" data-val="5" onclick="setStars(5)">&#9733;</span>
+        </div>
+        <div class="stars-desc" id="stars-desc"></div>
+        <div class="error-msg" id="error-stars">Por favor asigna una calificación.</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field-group">
+        <span class="field-label">&#128172; ¿Qué quieres reconocer?</span>
+        <span class="field-sublabel">¿Qué acción, comportamiento o contribución de esta persona aprecias más y quisieras destacar?</span>
+        <textarea id="textarea-reconocimiento" placeholder="Ej: Siempre llegó preparado a las sesiones y propuso ideas concretas cuando el equipo estaba estancado." rows="3"></textarea>
+        <div class="error-msg" id="error-reconocimiento">Este campo es obligatorio.</div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:0">
+        <span class="field-label">&#128640; ¿Qué le recomendarías fortalecer?</span>
+        <span class="field-sublabel">¿Qué comportamiento o hábito le ayudaría a potenciar aún más su desempeño en futuros proyectos?</span>
+        <textarea id="textarea-recomendacion" placeholder="Ej: Podría comunicar con más anticipación cuando tiene dudas, para que el equipo pueda apoyarse mejor." rows="3"></textarea>
+        <div class="error-msg" id="error-recomendacion">Este campo es obligatorio.</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-anterior" onclick="anterior()">&#8592; Anterior</button>
+      <button class="btn btn-primary" id="btn-siguiente" onclick="siguiente()">Siguiente &#8594;</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA 2: AUTOEVALUACIÓN -->
+  <div class="screen" id="screen-auto">
+    <div class="card">
+      <div class="intro-label">Paso final</div>
+      <div class="intro-title" style="font-size:22px;">Tu propia mirada</div>
+
+      <div class="auto-intro">
+        <div class="auto-intro-title">&#128269; Tu propia mirada</div>
+        <div class="auto-intro-text">
+          No describas lo que hiciste; <em>entiende qué te llevas</em>. Este <em>insight</em> es tuyo: nadie más lo verá más que tú y Sofía, tu profe.
+        </div>
+      </div>
+
+      <div class="field-group">
+        <span class="field-label">&#9989; ¿Qué hiciste muy bien?</span>
+        <span class="field-sublabel">Una o dos contribuciones concretas de las que te sientas orgulloso/a.</span>
+        <textarea id="auto-bien" placeholder="Ej: Me aseguré de que todos tuviéramos claridad sobre los entregables y propuse una forma de dividir el trabajo que funcionó bien." rows="3"></textarea>
+        <div class="error-msg" id="error-auto-bien">Este campo es obligatorio.</div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:0">
+        <span class="field-label">&#128640; ¿Qué mejorarías para el siguiente proyecto?</span>
+        <span class="field-sublabel">¿Qué aprendiste de tu propio estilo de colaboración que quieres desarrollar?</span>
+        <textarea id="auto-mejorar" placeholder="Ej: Tiendo a asumir responsabilidades sin delegar. Quiero practicar confiar más en mis compañeros y distribuir mejor la carga." rows="3"></textarea>
+        <div class="error-msg" id="error-auto-mejorar">Este campo es obligatorio.</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="irAEval(evaluadoActual - 1)">&#8592; Regresar</button>
+      <button class="btn btn-primary" id="btn-enviar" onclick="enviar()">Enviar evaluación &#10003;</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA 3: CONFIRMACIÓN -->
+  <div class="screen" id="screen-ok">
+    <div class="card" style="text-align:center; padding: 48px 32px;">
+      <div class="final-icon">&#10003;</div>
+      <div class="final-title">&#127881; ¡Evaluación enviada!</div>
+      <div class="final-body">
+        Evaluar a otros con honestidad y cuidado es una habilidad de alto impacto en cualquier organización. Hoy la practicaste. <strong>¡Significa mucho!</strong>
+      </div>
+
+      <div class="codigo-box">
+        <div class="codigo-label">Tu código de confirmación</div>
+        <div class="codigo-valor" id="codigo-confirmacion"></div>
+      </div>
+
+      <div style="background:#fff8e6;border:1.5px solid #f5a623;border-radius:10px;padding:16px 20px;margin-bottom:20px;text-align:left;max-width:480px;margin-left:auto;margin-right:auto;">
+        <div style="font-size:13px;font-weight:600;color:#b37200;margin-bottom:8px;">&#128248; Tu próximo paso</div>
+        <div style="font-size:13px;color:#5a4500;line-height:1.8;">
+          <strong>1.</strong> Toma un screenshot de esta pantalla (con tu código visible).<br>
+          <strong>2.</strong> Súbelo a Canvas en la actividad <strong>"Retroalimentación de tus Team Members"</strong>.<br>
+          <strong>3.</strong> Eso es todo con esta actividad.<br>
+          <strong>4.</strong> Es tiempo ya de enfocarte en tu examen; ingresa a la sección correspondiente en Canvas. ¡Confía en ti, lo harás muy bien! Todo el éxito.
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <button class="btn btn-secondary" onclick="editarRespuestas()" style="font-size:13px;">&#9999;&#65039; Editar mis respuestas</button>
+        <div style="margin-top:8px;font-size:12px;color:var(--texto-suave);">Puedes regresar a modificar cualquier evaluación antes de tomar tu screenshot.</div>
+      </div>
+
+      <div class="resumen-title">Resumen de tu evaluación</div>
+      <div id="resumen-lista"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── MATRIZ COMPLETA ─────────────────────────────────────────────────────────
+const MATRIX = {
+  "Abraham Díaz": ["Zamhara Rubio", "Brenda Martínez", "Ericka Castillo", "Analia Beas", "Irving Ramírez"],
+  "Brenda Martínez": ["Analia Beas", "Abraham Díaz", "Yareli Zamudio", "Ericka Castillo", "Irving Ramírez"],
+  "Ericka Castillo": ["Cinthia Barajas", "Abraham Díaz", "Brenda Martínez", "Analia Beas", "Irving Ramírez"],
+  "Yareli Zamudio": ["Abrham Rios", "Abraham Díaz", "Brenda Martínez", "Edwin Gutiérrez", "Iñigo Sánchez"],
+  "Ana Paola López": ["Danna Valenzuela", "Diego López", "Emiliano Cancino", "Luis Roberto Arvizu", "Cinthia Barajas"],
+  "Diego López": ["Matías García", "Ana Paola López", "Luis Santiago Hernández", "Miguel Rico", "Josué Navarro"],
+  "Edwin Gutiérrez": ["Irving Ramírez", "Ana Paola López", "Diego López", "Valeria Goicochea", "Víctor Mendoza"],
+  "Emiliano Cancino": ["Camila Gamboa", "Edwin Gutiérrez", "Luis Santiago Hernández", "Miguel Beltrán", "Aylyn Agredano"],
+  "Luis Santiago Hernández": ["Aylyn Agredano", "Emiliano Cancino", "Ana Paola López", "Sophia Sánchez", "Mateo Ramírez"],
+  "Iñigo Sánchez": ["Salvador Guerrero", "Sophia Sánchez", "Luis Roberto Arvizu", "Yareli Zamudio", "Valeria Goicochea"],
+  "Luis Roberto Arvizu": ["Miguel Rico", "Iñigo Sánchez", "Miguel Beltrán", "Danna Valenzuela", "Cinthia Barajas"],
+  "Miguel Beltrán": ["Zaida Paredes", "Miguel Rico", "Sophia Sánchez", "Aylyn Agredano", "Emiliano Cancino"],
+  "Miguel Rico": ["Luis Roberto Arvizu", "Iñigo Sánchez", "Miguel Beltrán", "Salvador Guerrero", "Matías García"],
+  "Sophia Sánchez": ["Abrham Rios", "Luis Roberto Arvizu", "Miguel Rico", "Camila Gamboa", "Zamhara Rubio"],
+  "Analia Beas": ["Brenda Martínez", "Zaida Paredes", "Aylyn Agredano", "Ericka Castillo", "Abraham Díaz"],
+  "Aylyn Agredano": ["Luis Santiago Hernández", "Zaida Paredes", "Analia Beas", "Emiliano Cancino", "Miguel Beltrán"],
+  "Cinthia Barajas": ["Ericka Castillo", "Valeria Goicochea", "Zaida Paredes", "Danna Valenzuela", "Abrham Rios"],
+  "Valeria Goicochea": ["Víctor Mendoza", "Cinthia Barajas", "Analia Beas", "Yareli Zamudio", "Edwin Gutiérrez"],
+  "Zaida Paredes": ["Miguel Beltrán", "Aylyn Agredano", "Cinthia Barajas", "Emiliano Cancino"],
+  "Danna Valenzuela": ["Ana Paola López", "Josué Navarro", "Mateo Ramírez", "Abrham Rios", "Luis Roberto Arvizu"],
+  "Irving Ramírez": ["Edwin Gutiérrez", "Salvador Guerrero", "Danna Valenzuela", "Brenda Martínez", "Ericka Castillo"],
+  "Josué Navarro": ["Mateo Ramírez", "Salvador Guerrero", "Danna Valenzuela", "Matías García", "Diego López"],
+  "Mateo Ramírez": ["Josué Navarro", "Irving Ramírez", "Salvador Guerrero", "Camila Gamboa", "Zamhara Rubio"],
+  "Salvador Guerrero": ["Iñigo Sánchez", "Josué Navarro", "Mateo Ramírez", "Matías García", "Diego López"],
+  "Camila Gamboa": ["Emiliano Cancino", "Víctor Mendoza", "Zamhara Rubio", "Luis Santiago Hernández", "Sophia Sánchez"],
+  "Abrham Rios": ["Yareli Zamudio", "Camila Gamboa", "Víctor Mendoza", "Ana Paola López", "Luis Roberto Arvizu"],
+  "Matías García": ["Diego López", "Camila Gamboa", "Abrham Rios", "Miguel Rico", "Josué Navarro"],
+  "Víctor Mendoza": ["Valeria Goicochea", "Matías García", "Zamhara Rubio", "Yareli Zamudio", "Edwin Gutiérrez"],
+  "Zamhara Rubio": ["Abraham Díaz", "Víctor Mendoza", "Camila Gamboa", "Luis Santiago Hernández", "Sophia Sánchez"],
+  "Sofía García Maza (DEMO)": ["Brenda Martínez", "Irving Ramírez"],
+};
+
+const EQUIPOS = {
+  "Abraham Díaz":            { color: "Blanco",    letras: "Alpha"   },
+  "Brenda Martínez":         { color: "Blanco",    letras: "Alpha"   },
+  "Ericka Castillo":         { color: "Blanco",    letras: "Alpha"   },
+  "Yareli Zamudio":          { color: "Cereza",    letras: "Alpha"   },
+  "Ana Paola López":         { color: "Esmeralda", letras: "Beta"    },
+  "Diego López":             { color: "Dorado",    letras: "Beta"    },
+  "Edwin Gutiérrez":         { color: "Cereza",    letras: "Beta"    },
+  "Emiliano Cancino":        { color: "Azul",      letras: "Beta"    },
+  "Luis Santiago Hernández": { color: "Fuego",     letras: "Beta"    },
+  "Iñigo Sánchez":           { color: "Cereza",    letras: "Delta"   },
+  "Luis Roberto Arvizu":     { color: "Esmeralda", letras: "Delta"   },
+  "Miguel Beltrán":          { color: "Azul",      letras: "Delta"   },
+  "Miguel Rico":             { color: "Dorado",    letras: "Delta"   },
+  "Sophia Sánchez":          { color: "Fuego",     letras: "Delta"   },
+  "Analia Beas":             { color: "Blanco",    letras: "Epsilon" },
+  "Aylyn Agredano":          { color: "Azul",      letras: "Epsilon" },
+  "Cinthia Barajas":         { color: "Esmeralda", letras: "Epsilon" },
+  "Valeria Goicochea":       { color: "Cereza",    letras: "Epsilon" },
+  "Zaida Paredes":           { color: "Azul",      letras: "Epsilon" },
+  "Danna Valenzuela":        { color: "Esmeralda", letras: "Gama"    },
+  "Irving Ramírez":          { color: "Blanco",    letras: "Gama"    },
+  "Josué Navarro":           { color: "Dorado",    letras: "Gama"    },
+  "Mateo Ramírez":           { color: "Fuego",     letras: "Gama"    },
+  "Salvador Guerrero":       { color: "Dorado",    letras: "Gama"    },
+  "Camila Gamboa":           { color: "Fuego",     letras: "Zeta"    },
+  "Abrham Rios":             { color: "Esmeralda", letras: "Zeta"    },
+  "Matías García":           { color: "Dorado",    letras: "Zeta"    },
+  "Víctor Mendoza":          { color: "Cereza",    letras: "Zeta"    },
+  "Zamhara Rubio":           { color: "Fuego",     letras: "Zeta"    },
+  "Sofía García Maza (DEMO)":{ color: "Demo",      letras: "Demo"    },
+};
+
+const PAR = {
+  "Abraham Díaz": "Zamhara Rubio", "Brenda Martínez": "Analia Beas",
+  "Ericka Castillo": "Cinthia Barajas", "Yareli Zamudio": "Abrham Rios",
+  "Ana Paola López": "Danna Valenzuela", "Diego López": "Matías García",
+  "Edwin Gutiérrez": "Irving Ramírez", "Emiliano Cancino": "Camila Gamboa",
+  "Luis Santiago Hernández": "Aylyn Agredano", "Iñigo Sánchez": "Salvador Guerrero",
+  "Luis Roberto Arvizu": "Miguel Rico", "Miguel Beltrán": "Zaida Paredes",
+  "Miguel Rico": "Luis Roberto Arvizu", "Sophia Sánchez": "Abrham Rios",
+  "Analia Beas": "Brenda Martínez", "Aylyn Agredano": "Luis Santiago Hernández",
+  "Cinthia Barajas": "Ericka Castillo", "Valeria Goicochea": "Víctor Mendoza",
+  "Zaida Paredes": "Miguel Beltrán", "Danna Valenzuela": "Ana Paola López",
+  "Irving Ramírez": "Edwin Gutiérrez", "Josué Navarro": "Mateo Ramírez",
+  "Mateo Ramírez": "Josué Navarro", "Salvador Guerrero": "Iñigo Sánchez",
+  "Camila Gamboa": "Emiliano Cancino", "Abrham Rios": "Yareli Zamudio",
+  "Matías García": "Diego López", "Víctor Mendoza": "Valeria Goicochea",
+  "Zamhara Rubio": "Abraham Díaz",
+};
+
+const STAR_DESC = ["", "Necesita mejorar", "Regular", "Bien", "Muy bien", "Excelente"];
+const ADJETIVOS = ["Veloz","Feroz","Audaz","Noble","Genial","Épico","Fugaz","Bello","Bravo","Fiero","Sabio","Único","Astuto","Hábil","Listo","Vivo","Ágil","Claro","Fiel","Suave"];
+const ANIMALES  = ["Axolote","Tapir","Capibara","Quetzal","Jaguar","Tlacuache","Ajolote","Coatí","Tecolote","Mapache","Pizote","Coyote","Ocelote","Tucán","Iguana","Nutria","Colibrí","Zorrillo","Armadillo","Tepezcuintle"];
+
+// ─── ESTADO ──────────────────────────────────────────────────────────────────
+let alumno = "";
+let evaluados = [];
+let evaluadoActual = 0;
+let respuestas = [];
+let estrellaActual = 0;
+let esDemo = false;
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  const sel = document.getElementById("nombre-select");
+  // Demo primero, separado
+  const demoOpt = document.createElement("option");
+  demoOpt.value = "Sofía García Maza (DEMO)";
+  demoOpt.textContent = "★ Sofía García Maza (DEMO) — Ver ejemplo";
+  demoOpt.style.color = "#856404";
+  sel.appendChild(demoOpt);
+
+  // Separador visual
+  const sep = document.createElement("option");
+  sep.disabled = true;
+  sep.textContent = "──────────────────────";
+  sel.appendChild(sep);
+
+  // Alumnos reales en orden alfabético
+  const nombres = Object.keys(MATRIX).filter(n => n !== "Sofía García Maza (DEMO)").sort();
+  nombres.forEach(n => {
+    const opt = document.createElement("option");
+    opt.value = n; opt.textContent = n;
+    sel.appendChild(opt);
+  });
+
+  sel.addEventListener("change", () => {
+    const aviso = document.getElementById("demo-aviso");
+    aviso.style.display = sel.value === "Sofía García Maza (DEMO)" ? "block" : "none";
+  });
+};
+
+// ─── INICIO ──────────────────────────────────────────────────────────────────
+function iniciarEvaluacion() {
+  const sel = document.getElementById("nombre-select");
+  alumno = sel.value;
+  if (!alumno) {
+    document.getElementById("error-nombre").classList.add("visible");
+    return;
+  }
+  document.getElementById("error-nombre").classList.remove("visible");
+  esDemo = alumno === "Sofía García Maza (DEMO)";
+  evaluados = MATRIX[alumno];
+  respuestas = evaluados.map(e => ({ nombre: e, estrellas: 0, reconocimiento: "", recomendacion: "" }));
+  evaluadoActual = 0;
+  mostrarEval(0);
+  mostrarPantalla("screen-eval");
+}
+
+// ─── EVAL ────────────────────────────────────────────────────────────────────
+function mostrarEval(idx) {
+  evaluadoActual = idx;
+  const ev = evaluados[idx];
+  const total = evaluados.length;
+  const pct = Math.round((idx / total) * 100);
+
+  document.getElementById("progress-label").textContent = `Evaluando ${idx + 1} de ${total}`;
+  document.getElementById("progress-pct").textContent = pct + "%";
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("eval-nombre").textContent = ev;
+
+  const eqs = EQUIPOS[ev] || { color: "–", letras: "–" };
+  const parActual = PAR[alumno];
+  let tags = `<span class="equipo-tag">Color ${eqs.color}</span><span class="equipo-tag">Letras ${eqs.letras}</span>`;
+  if (ev === parActual) tags += `<span class="equipo-tag" style="background:#fff3e6;color:#c15a00;">Par</span>`;
+  document.getElementById("eval-equipo").innerHTML = tags;
+
+  const r = respuestas[idx];
+  estrellaActual = r.estrellas;
+  renderStars(estrellaActual);
+  document.getElementById("textarea-reconocimiento").value = r.reconocimiento;
+  document.getElementById("textarea-recomendacion").value = r.recomendacion;
+  limpiarErrores();
+
+  document.getElementById("btn-anterior").style.visibility = idx === 0 ? "hidden" : "visible";
+  document.getElementById("btn-siguiente").textContent = idx === total - 1 ? "Continuar →" : "Siguiente →";
+}
+
+function setStars(val) {
+  estrellaActual = val;
+  renderStars(val);
+  document.getElementById("error-stars").classList.remove("visible");
+}
+
+function renderStars(val) {
+  document.querySelectorAll(".star").forEach(s => {
+    s.classList.toggle("filled", parseInt(s.dataset.val) <= val);
+  });
+  document.getElementById("stars-desc").textContent = STAR_DESC[val] || "";
+}
+
+function guardarRespuestaActual() {
+  respuestas[evaluadoActual].estrellas = estrellaActual;
+  respuestas[evaluadoActual].reconocimiento = document.getElementById("textarea-reconocimiento").value.trim();
+  respuestas[evaluadoActual].recomendacion = document.getElementById("textarea-recomendacion").value.trim();
+}
+
+function validarEval() {
+  let ok = true;
+  if (!estrellaActual) { document.getElementById("error-stars").classList.add("visible"); ok = false; }
+  if (!document.getElementById("textarea-reconocimiento").value.trim()) {
+    document.getElementById("error-reconocimiento").classList.add("visible"); ok = false;
+  }
+  if (!document.getElementById("textarea-recomendacion").value.trim()) {
+    document.getElementById("error-recomendacion").classList.add("visible"); ok = false;
+  }
+  return ok;
+}
+
+function limpiarErrores() {
+  ["error-stars","error-reconocimiento","error-recomendacion"].forEach(id =>
+    document.getElementById(id).classList.remove("visible"));
+}
+
+function siguiente() {
+  if (!validarEval()) return;
+  guardarRespuestaActual();
+  if (evaluadoActual < evaluados.length - 1) {
+    mostrarEval(evaluadoActual + 1);
+  } else {
+    mostrarPantalla("screen-auto");
+  }
+}
+
+function anterior() {
+  guardarRespuestaActual();
+  if (evaluadoActual > 0) mostrarEval(evaluadoActual - 1);
+}
+
+function irAEval(idx) {
+  guardarRespuestaActual();
+  mostrarEval(Math.max(0, idx));
+  mostrarPantalla("screen-eval");
+}
+
+// ─── ENVIAR ──────────────────────────────────────────────────────────────────
+async function enviar() {
+  const bien = document.getElementById("auto-bien").value.trim();
+  const mejorar = document.getElementById("auto-mejorar").value.trim();
+  let ok = true;
+  if (!bien) { document.getElementById("error-auto-bien").classList.add("visible"); ok = false; }
+  if (!mejorar) { document.getElementById("error-auto-mejorar").classList.add("visible"); ok = false; }
+  if (!ok) return;
+
+  const btn = document.getElementById("btn-enviar");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Enviando...';
+
+  const payload = {
+    alumno,
+    timestamp: new Date().toISOString(),
+    evaluaciones: respuestas,
+    autoevaluacion: { bien, mejorar }
+  };
+
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJD2n-52pwTzaQ6IYV0eZJQTOUl-Mz2gElM1fcLhYH6-KiiIT5eFo8VtlucIAU6I7n/exec";
+
+  try {
+    if (SCRIPT_URL !== "TU_APPS_SCRIPT_URL_AQUI") {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+    mostrarConfirmacion(payload);
+  } catch (e) {
+    mostrarConfirmacion(payload);
+  }
+}
+
+function mostrarConfirmacion(payload) {
+  const adj = ADJETIVOS[Math.floor(Math.random() * ADJETIVOS.length)];
+  const ani = ANIMALES[Math.floor(Math.random() * ANIMALES.length)];
+  document.getElementById("codigo-confirmacion").textContent = `${adj}${ani}`;
+
+  const lista = document.getElementById("resumen-lista");
+  lista.innerHTML = "";
+  payload.evaluaciones.forEach(r => {
+    const stars = "★".repeat(r.estrellas) + "☆".repeat(5 - r.estrellas);
+    lista.innerHTML += `
+      <div class="resumen-item">
+        <div class="resumen-nombre">${r.nombre}</div>
+        <div class="resumen-estrellas">${stars}</div>
+      </div>`;
+  });
+  lista.innerHTML += `
+    <div class="resumen-item" style="background:#f0f7ff;">
+      <div class="resumen-nombre">&#128269; Autoevaluación completada &#10003;</div>
+    </div>`;
+
+  mostrarPantalla("screen-ok");
+}
+
+function editarRespuestas() {
+  mostrarEval(0);
+  mostrarPantalla("screen-eval");
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function mostrarPantalla(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+</script>
+</body>
+</html>
