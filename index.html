@@ -527,8 +527,14 @@ async function enviar() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Enviando...';
 
+  // Generar código ANTES de enviar para incluirlo en el payload
+  const adj = ADJETIVOS[Math.floor(Math.random() * ADJETIVOS.length)];
+  const ani = ANIMALES[Math.floor(Math.random() * ANIMALES.length)];
+  const codigo = `${adj}${ani}`;
+
   const payload = {
     alumno,
+    codigo,
     timestamp: new Date().toISOString(),
     evaluaciones: respuestas,
     autoevaluacion: { bien, mejorar }
@@ -552,9 +558,7 @@ async function enviar() {
 }
 
 function mostrarConfirmacion(payload) {
-  const adj = ADJETIVOS[Math.floor(Math.random() * ADJETIVOS.length)];
-  const ani = ANIMALES[Math.floor(Math.random() * ANIMALES.length)];
-  document.getElementById("codigo-confirmacion").textContent = `${adj}${ani}`;
+  document.getElementById("codigo-confirmacion").textContent = payload.codigo;
 
   const lista = document.getElementById("resumen-lista");
   lista.innerHTML = "";
